@@ -2,6 +2,7 @@
 using System.Data.SQLite;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading.Channels;
 
 var StoragePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\User Data\Local State");
 var ChromePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\User Data");
@@ -12,46 +13,51 @@ var folders = new[]
 	Directory.GetDirectories(ChromePath, "Default*", SearchOption.TopDirectoryOnly).FirstOrDefault(),
 	Directory.GetDirectories(ChromePath, "*Profile*", SearchOption.TopDirectoryOnly).FirstOrDefault()
 };
+var export = new List<object>();
 foreach (var folder in folders)
 {
 	var folderName = Path.GetFileName(folder);
 
 	var dir = Path.Join(folder, "Login Data");
-	var connection = GetDbConnection(dir);
-	if (secreteKey != null && connection != null)
+	using (var connection = GetDbConnection(dir))
 	{
-		connection.Open();
-		using (var cmd = new SQLiteCommand("SELECT action_url, username_value, password_value FROM logins", connection))
+		if (secreteKey != null && connection != null)
 		{
-			var reader = cmd.ExecuteReader();
-			var index = 0;
-			while (reader.Read())
+			connection.Open();
+			using (var cmd = new SQLiteCommand("SELECT action_url, username_value, password_value FROM logins", connection))
 			{
-				var url = reader.GetString(0);
-				var username = reader.GetString(1);
-				var ciphertext = (byte[])reader.GetValue(2);
-				if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(username) && ciphertext != null)
+				var reader = cmd.ExecuteReader();
+				var index = 0;
+				while (reader.Read())
 				{
-					// Decrypt the password
-					using (var aesGcm = new AesGcmInternal(secreteKey))
+					var url = reader.GetString(0);
+					var username = reader.GetString(1);
+					var ciphertext = (byte[])reader.GetValue(2);
+					if (!string.IsNullOrEmpty(url) && !string.IsNullOrEmpty(username) && ciphertext != null)
 					{
-						var decryptedPassword = aesGcm.DecryptAndGetPassword(ciphertext);
-						Console.WriteLine($"Sequence: {index}");
-						Console.WriteLine($"URL: {url}\nUser Name: {username}\nPassword: {decryptedPassword}\n");
+						// Decrypt the password
+						using (var aesGcm = new AesGcmInternal(secreteKey))
+						{
+							var decryptedPassword = aesGcm.DecryptAndGetPassword(ciphertext);
+							Console.WriteLine($"Sequence: {index}");
+							Console.WriteLine($"URL: {url}\nUser Name: {username}\nPassword: {decryptedPassword}\n");
+							export.Add((url, username, decryptedPassword));
+						}
+
 					}
-
+					index++;
 				}
-				index++;
 			}
+			connection.Close();
 		}
-
-		// Close database connection
-		connection.Close();
-		connection.Dispose();
-		File.Delete("Loginvault.db");
 	}
 }
 
+Console.WriteLine("Do you want to export the password then provide the file path or press enter to exit out the program.");
+var exportPath = Console.ReadLine();
+if (string.IsNullOrWhiteSpace(exportPath) || !Directory.Exists(exportPath))
+	return;
+export.Export(Path.Combine(exportPath, "ChromeDecrypt.csv"));
 byte[]? GetSecretKey()
 {
 	try
