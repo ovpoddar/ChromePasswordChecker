@@ -7,7 +7,7 @@ Chrome Password Checker is a C# console application that allows you to convenien
 - **Password Security:** The application does not store any passwords locally or transmit them over the internet, ensuring the security and privacy of your sensitive information.
 
 # System Requirements
-- Windows, macOS, or Linux operating system
+- Windows operating system
 - .NET 7.0 runtime (download from [Microsoft .NET website](https://dotnet.microsoft.com/en-us/download/dotnet/7.0))
 
 # How to Use
