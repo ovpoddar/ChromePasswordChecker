@@ -23,8 +23,6 @@ var folders = new[]
 var export = new List<object>();
 foreach (var folder in folders)
 {
-    var folderName = Path.GetFileName(folder);
-
     var dir = Path.Join(folder, "Login Data");
     using (var connection = GetDbConnection(dir))
     {
