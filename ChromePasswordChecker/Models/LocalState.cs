@@ -3,12 +3,18 @@
 namespace ChromePasswordChecker.Models;
 public class LocalState
 {
-	[JsonPropertyName("os_crypt")]
-	public OsCrypt? OsCrypt { get; set; }
+    [JsonPropertyName("os_crypt")]
+    public OsCrypt? OsCrypt { get; set; }
 }
 
 public class OsCrypt
 {
-	[JsonPropertyName("encrypted_key")]
-	public string? EncryptedKey { get; set; }
+    [JsonPropertyName("encrypted_key")]
+    public string? EncryptedKey { get; set; }
+}
+
+[JsonSerializable(typeof(LocalState))]
+public partial class LocalStateContext : JsonSerializerContext
+{
+
 }

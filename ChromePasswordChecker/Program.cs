@@ -63,7 +63,7 @@ byte[]? GetSecretKey()
 	try
 	{
 		var textJson = File.Open(StoragePath, FileMode.Open);
-		var objectJson = JsonSerializer.Deserialize<LocalState>(textJson);
+		var objectJson = JsonSerializer.Deserialize(textJson, LocalStateContext.Default.LocalState);
 		if (objectJson == null 
 			|| objectJson.OsCrypt == null
 			|| string.IsNullOrWhiteSpace(objectJson.OsCrypt.EncryptedKey))
