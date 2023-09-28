@@ -1,9 +1,9 @@
 ﻿using ChromePasswordChecker.Models;
-using System.Data.SQLite;
+using Microsoft.Data.Sqlite;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-var chromeFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome");
+var chromeFolder = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome");
 
 if (!Directory.Exists(chromeFolder))
 {
@@ -11,8 +11,8 @@ if (!Directory.Exists(chromeFolder))
     return;
 }
 
-var StoragePath = Path.Combine(chromeFolder, @"User Data\Local State");
-var ChromePath = Path.Combine(chromeFolder, @"User Data");
+var StoragePath = Path.Join(chromeFolder, @"User Data\Local State");
+var ChromePath = Path.Join(chromeFolder, @"User Data");
 
 var secreteKey = GetSecretKey();
 var folders = new[]
@@ -29,9 +29,10 @@ foreach (var folder in folders)
         if (secreteKey != null && connection != null)
         {
             connection.Open();
-            using (var cmd = new SQLiteCommand("SELECT action_url, username_value, password_value FROM logins", connection))
+            var cmd = connection.CreateCommand();
+            cmd.CommandText = "SELECT action_url, username_value, password_value FROM logins";
+            using (var reader = cmd.ExecuteReader())
             {
-                var reader = cmd.ExecuteReader();
                 var index = 0;
                 while (reader.Read())
                 {
@@ -62,7 +63,7 @@ Console.WriteLine("Do you want to export the password then provide the file path
 var exportPath = Console.ReadLine();
 if (string.IsNullOrWhiteSpace(exportPath) || !Directory.Exists(exportPath))
     return;
-export.Export(Path.Combine(exportPath, "ChromeDecrypt.csv"));
+export.Export(Path.Join(exportPath, "ChromeDecrypt.csv"));
 byte[]? GetSecretKey()
 {
     try
@@ -87,12 +88,12 @@ byte[]? GetSecretKey()
 }
 
 
-static SQLiteConnection? GetDbConnection(string chromePathLoginDb)
+static SqliteConnection? GetDbConnection(string chromePathLoginDb)
 {
     try
     {
         File.Copy(chromePathLoginDb, "Loginvault.db", true);
-        return new SQLiteConnection("Data Source=Loginvault.db");
+        return new SqliteConnection("Data Source=Loginvault.db");
     }
     catch (Exception e)
     {
