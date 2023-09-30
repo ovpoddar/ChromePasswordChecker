@@ -1,8 +1,8 @@
 # Description
-Chrome Password Checker is a C# console application that allows you to conveniently view all the passwords stored in your Google Chrome browser. It provides a command-line interface and leverages the power of C# and .NET 6.0 to retrieve and display the saved passwords securely. Please note that this application is intended for personal use or in cases where you have explicit permission to access the passwords.
+Chrome Password Checker is a C# console application that allows you to conveniently view all the passwords stored in your Google Chrome browser. It provides a command-line interface and leverages the power of C# and .NET 7.0 to retrieve and display the saved passwords securely. Please note that this application is intended for personal use or in cases where you have explicit permission to access the passwords.
 
 # Features
-- **Password Retrieval:** Chrome Password Checker utilizes C# and .NET 6.0 to access the password database of your Google Chrome browser and securely retrieve the stored passwords.
+- **Password Retrieval:** Chrome Password Checker utilizes C# and .NET 7.0 to access the password database of your Google Chrome browser and securely retrieve the stored passwords.
 
 - **Password Security:** The application does not store any passwords locally or transmit them over the internet, ensuring the security and privacy of your sensitive information.
 
